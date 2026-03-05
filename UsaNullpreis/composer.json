@@ -1,22 +1,22 @@
 {
-    "name": "your-vendor/usanullpreis",
-    "description": "Setzt alle Preise auf 0 für eine bestimmte Kundengruppe",
-    "version": "2.0.0",
-    "type": "shopware-platform-plugin",
-    "license": "MIT",
-"require": {
-  "shopware/core": "~6.7.0"
-}
-    "autoload": {
-        "psr-4": {
-            "UsaNullpreis\\": "src/"
-        }
-    },
-    "extra": {
-        "shopware-plugin-class": "UsaNullpreis\\UsaNullpreis",
-        "label": {
-            "de-DE": "USA Nullpreis",
-            "en-GB": "USA Zero Price"
-        }
+  "name": "your-vendor/usanullpreis",
+  "description": "Setzt alle Preise auf 0 für eine bestimmte Kundengruppe",
+  "version": "2.0.0",
+  "type": "shopware-platform-plugin",
+  "license": "MIT",
+  "require": {
+    "shopware/core": "~6.7.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "UsaNullpreis\\": "src/"
     }
+  },
+  "extra": {
+    "shopware-plugin-class": "UsaNullpreis\\UsaNullpreis",
+    "label": {
+      "de-DE": "USA Nullpreis",
+      "en-GB": "USA Zero Price"
+    }
+  }
 }
