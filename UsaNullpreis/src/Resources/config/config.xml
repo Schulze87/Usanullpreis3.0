@@ -6,20 +6,18 @@
         <title>USA Nullpreis Einstellungen</title>
         <title lang="en-GB">USA Zero Price Settings</title>
 
-        <component name="usa-nullpreis-customer-group-select">
+        <component name="sw-entity-single-select">
             <name>customerGroupId</name>
+            <entity>customer_group</entity>
             <label>Kundengruppe</label>
-            <label lang="en-GB">Customer group</label>
-            <helpText>Kundengruppe, für die Nullpreise gelten sollen</helpText>
-            <helpText lang="en-GB">Customer group that should receive zero prices</helpText>
+            <label lang="en-GB">Customer Group</label>
         </component>
 
-        <component name="usa-nullpreis-rule-select">
+        <component name="sw-entity-single-select">
             <name>ruleId</name>
+            <entity>rule</entity>
             <label>Rule Builder Regel</label>
-            <label lang="en-GB">Rule Builder rule</label>
-            <helpText>Regel, bei der Nullpreise gelten sollen</helpText>
-            <helpText lang="en-GB">Rule that should trigger zero prices</helpText>
+            <label lang="en-GB">Rule Builder Rule</label>
         </component>
     </card>
 
