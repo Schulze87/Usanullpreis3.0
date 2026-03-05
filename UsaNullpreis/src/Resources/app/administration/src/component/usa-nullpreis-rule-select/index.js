@@ -15,11 +15,14 @@ Component.register('usa-nullpreis-rule-select', {
     computed: {
         currentValue: {
             get() {
-                return this.value || null;
+                return this.value ?? null;
             },
             set(val) {
-                this.$emit('input', val || null);
-                this.$emit('change', val || null);
+                const id = (val && typeof val === 'object') ? val.id : val;
+                const normalized = id || null;
+
+                this.$emit('input', normalized);
+                this.$emit('change', normalized);
             },
         },
     },
