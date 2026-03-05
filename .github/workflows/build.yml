@@ -12,22 +12,35 @@ jobs:
 
       - name: Debug – Struktur prüfen
         run: |
+          echo "=== Root ==="
+          pwd
+          ls -la
+
           echo "=== Inhalt von UsaNullpreis/ ==="
           ls -la ./UsaNullpreis/
+
           echo "=== Inhalt von UsaNullpreis/src/ ==="
           find ./UsaNullpreis/src -type f
+
           echo "=== composer.json ==="
           cat ./UsaNullpreis/composer.json
+
           echo "=== Hauptklasse ==="
           cat ./UsaNullpreis/src/UsaNullpreis.php
+
           echo "=== services.xml ==="
           cat ./UsaNullpreis/src/Resources/config/services.xml
+
           echo "=== config.xml ==="
           cat ./UsaNullpreis/src/Resources/config/config.xml 2>/dev/null || echo "config.xml nicht vorhanden"
-          echo "=== Admin JS ==="
-          find ./UsaNullpreis/src/Resources/app -type f 2>/dev/null || echo "Keine Admin-Assets gefunden"
 
-      - name: Setup Node.js
+          echo "=== Admin src ==="
+          ls -la ./UsaNullpreis/src/Resources/app/administration/src 2>/dev/null || echo "Kein administration/src vorhanden"
+          echo "=== Admin components ==="
+          ls -la ./UsaNullpreis/src/Resources/app/administration/src/component 2>/dev/null || echo "Kein component-Ordner vorhanden"
+          find ./UsaNullpreis/src/Resources/app/administration/src/component -maxdepth 3 -type f 2>/dev/null || true
+
+      - name: Setup Node.js (für Shopware 6.7)
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -37,8 +50,8 @@ jobs:
         with:
           version: 0.12.0
 
-      - name: Build Extension
-        run: shopware-cli extension zip ./UsaNullpreis --disable-git --verbose
+      - name: Build Extension (Shopware 6.7.7.1)
+        run: shopware-cli extension zip ./UsaNullpreis 6.7.7.1 --disable-git --verbose
 
       - name: Upload ZIP as Artifact
         uses: actions/upload-artifact@v4
