@@ -1,0 +1,21 @@
+{% sw_extends '@Storefront/storefront/layout/meta.html.twig' %}
+
+{% block layout_head_stylesheet %}
+    {{ parent() }}
+    {% if context.currentCustomerGroup.id == usaNullpreisCustomerGroupId
+        or usaNullpreisRuleId in context.ruleIds %}
+        <style>
+            .order-item-detail-summary { display: none; }
+            .line-item-total-price-value { display: none; }
+            .offcanvas-summary { display: none; }
+            .cart-header-tax-price { display: none; }
+            .cart-header-total-price { display: none; }
+            .line-item-tax-price { display: none; }
+            .line-item-total-price { display: none; }
+            .line-item-price { display: none; }
+            .line-item-unit-price-value { display: none; }
+            .offcanvas-cart-tax { display: none; }
+            .checkout-aside-summary { display: none; }
+        </style>
+    {% endif %}
+{% endblock %}
