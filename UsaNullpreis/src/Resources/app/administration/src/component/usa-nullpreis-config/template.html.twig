@@ -1,0 +1,27 @@
+{% block usa_nullpreis_config %}
+<sw-card :title="$tc('usa-nullpreis.config.title')" :isLoading="isLoading">
+
+    <sw-entity-single-select
+        entity="customer_group"
+        :label="$tc('usa-nullpreis.config.customerGroupLabel')"
+        :helpText="$tc('usa-nullpreis.config.customerGroupHelp')"
+        v-model="selectedCustomerGroupId"
+        showClearableButton
+    />
+
+    <sw-entity-single-select
+        entity="rule"
+        :label="$tc('usa-nullpreis.config.ruleLabel')"
+        :helpText="$tc('usa-nullpreis.config.ruleHelp')"
+        v-model="selectedRuleId"
+        showClearableButton
+    />
+
+    <template #footer>
+        <sw-button variant="primary" @click="onSave">
+            {{ $tc('usa-nullpreis.config.save') }}
+        </sw-button>
+    </template>
+
+</sw-card>
+{% endblock %}
