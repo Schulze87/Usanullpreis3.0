@@ -1,0 +1,13 @@
+{
+    "usa-nullpreis": {
+        "config": {
+            "title": "USA Nullpreis Einstellungen",
+            "customerGroupLabel": "Kundengruppe",
+            "customerGroupHelp": "Kundengruppe, für die Nullpreise gelten sollen",
+            "ruleLabel": "Rule Builder Regel",
+            "ruleHelp": "Regel, bei der Nullpreise gelten sollen",
+            "save": "Speichern",
+            "saveSuccess": "Einstellungen gespeichert"
+        }
+    }
+}
