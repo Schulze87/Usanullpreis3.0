@@ -17,8 +17,6 @@ Component.register('usa-nullpreis-config', {
 
     data() {
         return {
-            customerGroups: [],
-            rules: [],
             selectedCustomerGroupId: null,
             selectedRuleId: null,
             isLoading: true,
@@ -42,17 +40,8 @@ Component.register('usa-nullpreis-config', {
         async loadData() {
             this.isLoading = true;
 
-            const criteria = new Criteria();
-            criteria.setLimit(500);
+            const config = await this.systemConfigApiService.getValues('UsaNullpreis.config');
 
-            const [customerGroups, rules, config] = await Promise.all([
-                this.customerGroupRepository.search(criteria, Shopware.Context.api),
-                this.ruleRepository.search(criteria, Shopware.Context.api),
-                this.systemConfigApiService.getValues('UsaNullpreis.config'),
-            ]);
-
-            this.customerGroups = customerGroups;
-            this.rules = rules;
             this.selectedCustomerGroupId = config['UsaNullpreis.config.customerGroupId'] ?? null;
             this.selectedRuleId = config['UsaNullpreis.config.ruleId'] ?? null;
 
@@ -60,14 +49,20 @@ Component.register('usa-nullpreis-config', {
         },
 
         async onSave() {
-            await this.systemConfigApiService.saveValues({
-                'UsaNullpreis.config.customerGroupId': this.selectedCustomerGroupId,
-                'UsaNullpreis.config.ruleId': this.selectedRuleId,
-            });
+            try {
+                await this.systemConfigApiService.saveValues({
+                    'UsaNullpreis.config.customerGroupId': this.selectedCustomerGroupId,
+                    'UsaNullpreis.config.ruleId': this.selectedRuleId,
+                });
 
-            this.createNotificationSuccess({
-                message: this.$tc('usa-nullpreis.config.saveSuccess'),
-            });
+                this.createNotificationSuccess({
+                    message: this.$tc('usa-nullpreis.config.saveSuccess'),
+                });
+            } catch (e) {
+                this.createNotificationError({
+                    message: 'Fehler beim Speichern',
+                });
+            }
         },
     },
 });
