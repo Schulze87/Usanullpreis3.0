@@ -5,7 +5,8 @@
         entity="customer_group"
         :label="$tc('usa-nullpreis.config.customerGroupLabel')"
         :helpText="$tc('usa-nullpreis.config.customerGroupHelp')"
-        v-model="selectedCustomerGroupId"
+        :value="selectedCustomerGroupId"
+        @change="selectedCustomerGroupId = $event"
         showClearableButton
     />
 
@@ -13,7 +14,8 @@
         entity="rule"
         :label="$tc('usa-nullpreis.config.ruleLabel')"
         :helpText="$tc('usa-nullpreis.config.ruleHelp')"
-        v-model="selectedRuleId"
+        :value="selectedRuleId"
+        @change="selectedRuleId = $event"
         showClearableButton
     />
 
