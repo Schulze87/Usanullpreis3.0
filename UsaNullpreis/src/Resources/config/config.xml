@@ -3,11 +3,23 @@
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
 
     <card>
-        <title>USA Nullpreis</title>
-        <title lang="en-GB">USA Zero Price</title>
+        <title>USA Nullpreis Einstellungen</title>
+        <title lang="en-GB">USA Zero Price Settings</title>
 
-        <component name="usa-nullpreis-config">
-            <name>usaNullpreisConfig</name>
+        <component name="usa-nullpreis-customer-group-select">
+            <name>customerGroupId</name>
+            <label>Kundengruppe</label>
+            <label lang="en-GB">Customer group</label>
+            <helpText>Kundengruppe, für die Nullpreise gelten sollen</helpText>
+            <helpText lang="en-GB">Customer group that should receive zero prices</helpText>
+        </component>
+
+        <component name="usa-nullpreis-rule-select">
+            <name>ruleId</name>
+            <label>Rule Builder Regel</label>
+            <label lang="en-GB">Rule Builder rule</label>
+            <helpText>Regel, bei der Nullpreise gelten sollen</helpText>
+            <helpText lang="en-GB">Rule that should trigger zero prices</helpText>
         </component>
     </card>
 
