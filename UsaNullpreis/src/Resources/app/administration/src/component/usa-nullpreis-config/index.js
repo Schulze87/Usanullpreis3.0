@@ -1,68 +1,42 @@
 import template from './template.html.twig';
 
-const { Component, Mixin } = Shopware;
-const { Criteria } = Shopware.Data;
+const { Component } = Shopware;
 
-Component.register('usa-nullpreis-config', {
+Component.register('usa-nullpreis-customer-group-select', {
     template,
 
-    mixins: [
-        Mixin.getByName('notification'),
-    ],
-
-    inject: [
-        'repositoryFactory',
-        'systemConfigApiService',
-    ],
-
-    data() {
-        return {
-            selectedCustomerGroupId: null,
-            selectedRuleId: null,
-            isLoading: true,
-        };
+    props: {
+        value: {
+            required: false,
+            default: null,
+        },
+        disabled: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
+        label: {
+            type: String,
+            required: false,
+            default: null,
+        },
+        helpText: {
+            type: String,
+            required: false,
+            default: null,
+        },
     },
 
     computed: {
-        customerGroupRepository() {
-            return this.repositoryFactory.create('customer_group');
-        },
-        ruleRepository() {
-            return this.repositoryFactory.create('rule');
-        },
-    },
-
-    created() {
-        this.loadData();
-    },
-
-    methods: {
-        async loadData() {
-            this.isLoading = true;
-
-            const config = await this.systemConfigApiService.getValues('UsaNullpreis.config');
-
-            this.selectedCustomerGroupId = config['UsaNullpreis.config.customerGroupId'] ?? null;
-            this.selectedRuleId = config['UsaNullpreis.config.ruleId'] ?? null;
-
-            this.isLoading = false;
-        },
-
-        async onSave() {
-            try {
-                await this.systemConfigApiService.saveValues({
-                    'UsaNullpreis.config.customerGroupId': this.selectedCustomerGroupId,
-                    'UsaNullpreis.config.ruleId': this.selectedRuleId,
-                });
-
-                this.createNotificationSuccess({
-                    message: this.$tc('usa-nullpreis.config.saveSuccess'),
-                });
-            } catch (e) {
-                this.createNotificationError({
-                    message: 'Fehler beim Speichern',
-                });
-            }
+        currentValue: {
+            get() {
+                return this.value || null;
+            },
+            set(val) {
+                // Wichtig: an sw-system-config hochreichen
+                this.$emit('input', val || null);
+                this.$emit('change', val || null);
+            },
         },
     },
 });
