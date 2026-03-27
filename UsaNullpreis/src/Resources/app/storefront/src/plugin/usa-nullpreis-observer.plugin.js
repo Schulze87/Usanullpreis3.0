@@ -3,31 +3,24 @@ import Plugin from 'src/plugin-system/plugin.class';
 export default class UsaNullpreisObserverPlugin extends Plugin {
     init() {
         this.selectors = [
-            '.order-item-detail-summary',
             '.line-item-total-price-value',
             '.offcanvas-summary',
-            '.cart-header-tax-price',
-            '.cart-header-total-price',
             '.line-item-tax-price',
             '.line-item-total-price',
             '.line-item-price',
             '.line-item-unit-price-value',
             '.offcanvas-cart-tax',
-            '.checkout-aside-summary',
         ];
 
-        this.applyState = this.applyState.bind(this);
+        this.timeout = null;
+
+        this.applyToOffcanvas = this.applyToOffcanvas.bind(this);
+        this.applyToAllOpenOffcanvas = this.applyToAllOpenOffcanvas.bind(this);
         this.handleMutations = this.handleMutations.bind(this);
 
-        this.applyState();
+        this.applyToAllOpenOffcanvas();
 
         this.observer = new MutationObserver(this.handleMutations);
-
-        this.observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ['data-usa-nullpreis-active'],
-        });
-
         this.observer.observe(document.body, {
             childList: true,
             subtree: true,
@@ -38,33 +31,47 @@ export default class UsaNullpreisObserverPlugin extends Plugin {
         let shouldApply = false;
 
         for (const mutation of mutations) {
-            if (
-                mutation.type === 'attributes' &&
-                mutation.target === document.documentElement &&
-                mutation.attributeName === 'data-usa-nullpreis-active'
-            ) {
-                shouldApply = true;
+            for (const node of mutation.addedNodes) {
+                if (!(node instanceof Element)) {
+                    continue;
+                }
+
+                if (
+                    node.matches('.offcanvas, .offcanvas-cart') ||
+                    node.querySelector('.offcanvas, .offcanvas-cart')
+                ) {
+                    shouldApply = true;
+                    break;
+                }
+            }
+
+            if (shouldApply) {
                 break;
             }
-
-            if (
-                mutation.type === 'childList' &&
-                (mutation.addedNodes.length > 0 || mutation.removedNodes.length > 0)
-            ) {
-                shouldApply = true;
-            }
         }
 
-        if (shouldApply) {
-            this.applyState();
+        if (!shouldApply) {
+            return;
         }
+
+        window.clearTimeout(this.timeout);
+        this.timeout = window.setTimeout(() => {
+            this.applyToAllOpenOffcanvas();
+        }, 80);
     }
 
-    applyState() {
+    applyToAllOpenOffcanvas() {
         const active = document.documentElement.dataset.usaNullpreisActive === '1';
+        const offcanvases = document.querySelectorAll('.offcanvas, .offcanvas-cart');
 
+        offcanvases.forEach((offcanvas) => {
+            this.applyToOffcanvas(offcanvas, active);
+        });
+    }
+
+    applyToOffcanvas(container, active) {
         this.selectors.forEach((selector) => {
-            document.querySelectorAll(selector).forEach((el) => {
+            container.querySelectorAll(selector).forEach((el) => {
                 el.style.display = active ? 'none' : '';
             });
         });
@@ -73,6 +80,10 @@ export default class UsaNullpreisObserverPlugin extends Plugin {
     destroy() {
         if (this.observer) {
             this.observer.disconnect();
+        }
+
+        if (this.timeout) {
+            window.clearTimeout(this.timeout);
         }
 
         super.destroy();
