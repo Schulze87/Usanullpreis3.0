@@ -18,6 +18,8 @@ export default class UsaNullpreisObserverPlugin extends Plugin {
         this.applyToAllOpenOffcanvas = this.applyToAllOpenOffcanvas.bind(this);
         this.handleMutations = this.handleMutations.bind(this);
 
+        console.debug('[UsaNullpreisObserver] init');
+
         this.applyToAllOpenOffcanvas();
 
         this.observer = new MutationObserver(this.handleMutations);
@@ -25,69 +27,99 @@ export default class UsaNullpreisObserverPlugin extends Plugin {
             childList: true,
             subtree: true,
         });
+
+        console.debug('[UsaNullpreisObserver] observer attached to document.body');
     }
 
-handleMutations(mutations) {
-    let shouldApply = false;
+    handleMutations(mutations) {
+        console.debug('[UsaNullpreisObserver] mutations received:', mutations.length);
 
-    for (const mutation of mutations) {
-        const target = mutation.target instanceof Element ? mutation.target : null;
+        let shouldApply = false;
 
-        if (target && target.closest('.offcanvas, .offcanvas-cart')) {
-            shouldApply = true;
-            break;
-        }
+        for (const mutation of mutations) {
+            const target = mutation.target instanceof Element ? mutation.target : null;
 
-        for (const node of mutation.addedNodes) {
-            if (!(node instanceof Element)) {
-                continue;
+            if (target && target.closest('.offcanvas, .offcanvas-cart')) {
+                console.debug('[UsaNullpreisObserver] mutation inside offcanvas detected', target);
+                shouldApply = true;
+                break;
             }
 
-            if (
-                node.closest('.offcanvas, .offcanvas-cart') ||
-                node.matches('.offcanvas, .offcanvas-cart') ||
-                node.querySelector('.offcanvas, .offcanvas-cart')
-            ) {
-                shouldApply = true;
+            for (const node of mutation.addedNodes) {
+                if (!(node instanceof Element)) {
+                    continue;
+                }
+
+                if (
+                    node.closest('.offcanvas, .offcanvas-cart') ||
+                    node.matches('.offcanvas, .offcanvas-cart') ||
+                    node.querySelector('.offcanvas, .offcanvas-cart')
+                ) {
+                    console.debug('[UsaNullpreisObserver] offcanvas-related node added', node);
+                    shouldApply = true;
+                    break;
+                }
+            }
+
+            if (shouldApply) {
                 break;
             }
         }
 
-        if (shouldApply) {
-            break;
+        if (!shouldApply) {
+            return;
         }
-    }
 
-    if (!shouldApply) {
-        return;
+        window.clearTimeout(this.timeout);
+        this.timeout = window.setTimeout(() => {
+            console.debug('[UsaNullpreisObserver] applyToAllOpenOffcanvas after debounce');
+            this.applyToAllOpenOffcanvas();
+        }, 80);
     }
-
-    window.clearTimeout(this.timeout);
-    this.timeout = window.setTimeout(() => {
-        this.applyToAllOpenOffcanvas();
-    }, 80);
-}
 
     applyToAllOpenOffcanvas() {
         const active = document.documentElement.dataset.usaNullpreisActive === '1';
         const offcanvases = document.querySelectorAll('.offcanvas, .offcanvas-cart');
 
-        offcanvases.forEach((offcanvas) => {
+        console.debug('[UsaNullpreisObserver] applyToAllOpenOffcanvas', {
+            active,
+            offcanvasCount: offcanvases.length,
+        });
+
+        offcanvases.forEach((offcanvas, index) => {
+            console.debug('[UsaNullpreisObserver] applying to offcanvas', index, offcanvas);
             this.applyToOffcanvas(offcanvas, active);
         });
     }
 
     applyToOffcanvas(container, active) {
+        console.debug('[UsaNullpreisObserver] applyToOffcanvas', {
+            active,
+            container,
+        });
+
         this.selectors.forEach((selector) => {
-            container.querySelectorAll(selector).forEach((el) => {
+            const elements = container.querySelectorAll(selector);
+
+            if (elements.length) {
+                console.debug('[UsaNullpreisObserver] selector hit', {
+                    selector,
+                    count: elements.length,
+                });
+            }
+
+            elements.forEach((el) => {
                 el.style.display = active ? 'none' : '';
             });
         });
     }
 
     destroy() {
+        console.debug('[UsaNullpreisObserver] destroy');
+
         if (this.observer) {
             this.observer.disconnect();
+            console.debug('[UsaNullpreisObserver] observer disconnected');
         }
 
         if (this.timeout) {
