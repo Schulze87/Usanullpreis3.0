@@ -17,5 +17,11 @@
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
             <tag name="twig.extension"/>
         </service>
+
+        <service id="UsaNullpreis\Storefront\Controller\UsaNullpreisController" public="true">
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
     </services>
 </container>
