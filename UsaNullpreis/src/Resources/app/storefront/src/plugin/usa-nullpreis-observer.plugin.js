@@ -3,24 +3,25 @@ import Plugin from 'src/plugin-system/plugin.class';
 export default class UsaNullpreisObserverPlugin extends Plugin {
     init() {
         this.selectors = [
-            '.line-item-total-price-value',
-            '.offcanvas-summary',
-            '.line-item-tax-price',
-            '.line-item-total-price',
-            '.line-item-price',
-            '.line-item-unit-price-value',
-            '.offcanvas-cart-tax',
+            '.offcanvas .line-item-total-price-value',
+            '.offcanvas .offcanvas-summary',
+            '.offcanvas .line-item-tax-price',
+            '.offcanvas .line-item-total-price',
+            '.offcanvas .line-item-price',
+            '.offcanvas .line-item-unit-price-value',
+            '.offcanvas .offcanvas-cart-tax',
         ];
 
         this.timeout = null;
+        this.followUpTimeouts = [];
 
-        this.applyToOffcanvas = this.applyToOffcanvas.bind(this);
         this.applyToAllOpenOffcanvas = this.applyToAllOpenOffcanvas.bind(this);
         this.handleMutations = this.handleMutations.bind(this);
+        this.scheduleApply = this.scheduleApply.bind(this);
 
-        console.debug('[UsaNullpreisObserver] init');
+        console.log('[UsaNullpreisObserver] init');
 
-        this.applyToAllOpenOffcanvas();
+        this.scheduleApply();
 
         this.observer = new MutationObserver(this.handleMutations);
         this.observer.observe(document.body, {
@@ -28,19 +29,16 @@ export default class UsaNullpreisObserverPlugin extends Plugin {
             subtree: true,
         });
 
-        console.debug('[UsaNullpreisObserver] observer attached to document.body');
+        console.log('[UsaNullpreisObserver] observer attached to document.body');
     }
 
     handleMutations(mutations) {
-        console.debug('[UsaNullpreisObserver] mutations received:', mutations.length);
-
         let shouldApply = false;
 
         for (const mutation of mutations) {
             const target = mutation.target instanceof Element ? mutation.target : null;
 
-            if (target && target.closest('.offcanvas, .offcanvas-cart')) {
-                console.debug('[UsaNullpreisObserver] mutation inside offcanvas detected', target);
+            if (target && target.closest('.offcanvas, .offcanvas-cart, .cart-offcanvas')) {
                 shouldApply = true;
                 break;
             }
@@ -51,11 +49,10 @@ export default class UsaNullpreisObserverPlugin extends Plugin {
                 }
 
                 if (
-                    node.closest('.offcanvas, .offcanvas-cart') ||
-                    node.matches('.offcanvas, .offcanvas-cart') ||
-                    node.querySelector('.offcanvas, .offcanvas-cart')
+                    node.matches('.offcanvas, .offcanvas-cart, .cart-offcanvas') ||
+                    node.closest('.offcanvas, .offcanvas-cart, .cart-offcanvas') ||
+                    node.querySelector('.offcanvas, .offcanvas-cart, .cart-offcanvas')
                 ) {
-                    console.debug('[UsaNullpreisObserver] offcanvas-related node added', node);
                     shouldApply = true;
                     break;
                 }
@@ -70,61 +67,81 @@ export default class UsaNullpreisObserverPlugin extends Plugin {
             return;
         }
 
+        console.log('[UsaNullpreisObserver] mutation erkannt');
+        this.scheduleApply();
+    }
+
+    scheduleApply() {
         window.clearTimeout(this.timeout);
+        this.followUpTimeouts.forEach((id) => window.clearTimeout(id));
+        this.followUpTimeouts = [];
+
         this.timeout = window.setTimeout(() => {
-            console.debug('[UsaNullpreisObserver] applyToAllOpenOffcanvas after debounce');
-            this.applyToAllOpenOffcanvas();
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    console.log('[UsaNullpreisObserver] apply pass 1');
+                    this.applyToAllOpenOffcanvas();
+
+                    this.followUpTimeouts.push(window.setTimeout(() => {
+                        console.log('[UsaNullpreisObserver] apply pass 2');
+                        this.applyToAllOpenOffcanvas();
+                    }, 120));
+
+                    this.followUpTimeouts.push(window.setTimeout(() => {
+                        console.log('[UsaNullpreisObserver] apply pass 3');
+                        this.applyToAllOpenOffcanvas();
+                    }, 250));
+
+                    this.followUpTimeouts.push(window.setTimeout(() => {
+                        console.log('[UsaNullpreisObserver] apply pass 4');
+                        this.applyToAllOpenOffcanvas();
+                    }, 500));
+                });
+            });
         }, 80);
     }
 
     applyToAllOpenOffcanvas() {
         const active = document.documentElement.dataset.usaNullpreisActive === '1';
-        const offcanvases = document.querySelectorAll('.offcanvas, .offcanvas-cart');
 
-        console.debug('[UsaNullpreisObserver] applyToAllOpenOffcanvas', {
-            active,
-            offcanvasCount: offcanvases.length,
-        });
+        console.log('[UsaNullpreisObserver] applyToAllOpenOffcanvas', { active });
 
-        offcanvases.forEach((offcanvas, index) => {
-            console.debug('[UsaNullpreisObserver] applying to offcanvas', index, offcanvas);
-            this.applyToOffcanvas(offcanvas, active);
-        });
-    }
-
-    applyToOffcanvas(container, active) {
-        console.debug('[UsaNullpreisObserver] applyToOffcanvas', {
-            active,
-            container,
-        });
+        if (!active) {
+            this.selectors.forEach((selector) => {
+                document.querySelectorAll(selector).forEach((el) => {
+                    el.style.display = '';
+                });
+            });
+            return;
+        }
 
         this.selectors.forEach((selector) => {
-            const elements = container.querySelectorAll(selector);
+            const elements = document.querySelectorAll(selector);
 
             if (elements.length) {
-                console.debug('[UsaNullpreisObserver] selector hit', {
+                console.log('[UsaNullpreisObserver] selector hit', {
                     selector,
                     count: elements.length,
                 });
             }
 
             elements.forEach((el) => {
-                el.style.display = active ? 'none' : '';
+                el.style.display = 'none';
             });
         });
     }
 
     destroy() {
-        console.debug('[UsaNullpreisObserver] destroy');
-
         if (this.observer) {
             this.observer.disconnect();
-            console.debug('[UsaNullpreisObserver] observer disconnected');
         }
 
         if (this.timeout) {
             window.clearTimeout(this.timeout);
         }
+
+        this.followUpTimeouts.forEach((id) => window.clearTimeout(id));
+        this.followUpTimeouts = [];
 
         super.destroy();
     }
