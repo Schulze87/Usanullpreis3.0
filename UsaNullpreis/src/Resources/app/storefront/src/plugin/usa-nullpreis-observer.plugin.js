@@ -27,38 +27,46 @@ export default class UsaNullpreisObserverPlugin extends Plugin {
         });
     }
 
-    handleMutations(mutations) {
-        let shouldApply = false;
+handleMutations(mutations) {
+    let shouldApply = false;
 
-        for (const mutation of mutations) {
-            for (const node of mutation.addedNodes) {
-                if (!(node instanceof Element)) {
-                    continue;
-                }
+    for (const mutation of mutations) {
+        const target = mutation.target instanceof Element ? mutation.target : null;
 
-                if (
-                    node.matches('.offcanvas, .offcanvas-cart') ||
-                    node.querySelector('.offcanvas, .offcanvas-cart')
-                ) {
-                    shouldApply = true;
-                    break;
-                }
+        if (target && target.closest('.offcanvas, .offcanvas-cart')) {
+            shouldApply = true;
+            break;
+        }
+
+        for (const node of mutation.addedNodes) {
+            if (!(node instanceof Element)) {
+                continue;
             }
 
-            if (shouldApply) {
+            if (
+                node.closest('.offcanvas, .offcanvas-cart') ||
+                node.matches('.offcanvas, .offcanvas-cart') ||
+                node.querySelector('.offcanvas, .offcanvas-cart')
+            ) {
+                shouldApply = true;
                 break;
             }
         }
 
-        if (!shouldApply) {
-            return;
+        if (shouldApply) {
+            break;
         }
-
-        window.clearTimeout(this.timeout);
-        this.timeout = window.setTimeout(() => {
-            this.applyToAllOpenOffcanvas();
-        }, 80);
     }
+
+    if (!shouldApply) {
+        return;
+    }
+
+    window.clearTimeout(this.timeout);
+    this.timeout = window.setTimeout(() => {
+        this.applyToAllOpenOffcanvas();
+    }, 80);
+}
 
     applyToAllOpenOffcanvas() {
         const active = document.documentElement.dataset.usaNullpreisActive === '1';
