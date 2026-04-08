@@ -22,22 +22,7 @@
         </style>
     {% endif %}
 
-let last = '';
-
-async function watchCartRules() {
-    const res = await fetch('/rule-debug/cart-rules', {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    });
-    const data = await res.json();
-    const next = JSON.stringify(data.ruleIds);
-
-    if (next !== last) {
-        last = next;
-        console.clear();
-        console.log('Cart Rule IDs:', data.ruleIds);
-    }
-}
-
-setInterval(watchCartRules, 1000);
-watchCartRules();
+    <script>
+        document.documentElement.dataset.usaNullpreisActive = '{{ usaNullpreisActive ? '1' : '0' }}';
+    </script>
 {% endblock %}
